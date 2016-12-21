@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:toggle="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ececec"
+    android:layout_marginTop="25dp"
+    >
+<!--
+ dependencies에 compile 'com.zcw:togglebutton-library:1.0.0' 추가
+
+    사용법
+        ToggleButton toggleBtn;
+        toggleBtn.toggle();
+        toggleBtn.toggle(false);
+        toggleBtn.setOnToggleChanged(new OnToggleChanged(){
+                @Override
+                public void onToggle(boolean on) {
+                }
+        });
+        toggleBtn.setToggleOn();
+        toggleBtn.setToggleOff();
+        toggleBtn.setToggleOn(false);
+        toggleBtn.setToggleOff(false);
+        toggleBtn.setAnimate(false);
+-->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@drawable/am_bg_list_white_arrow"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ias_auto_login"
+            android:textColor="#333333"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="10dp"
+            android:layout_centerVertical="true"
+            />
+        <com.zcw.togglebutton.ToggleButton
+            android:id="@+id/auto_login_toggle"
+            android:layout_alignParentRight="true"
+            android:layout_width="48dp"
+            android:layout_height="28dp"
+            toggle:tbOnColor="#007296"
+            toggle:tbOffColor="#ddd"
+            toggle:tbSpotColor="#fff"
+            android:layout_centerVertical="true"
+            />
+    </RelativeLayout>
+</LinearLayout>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/messagebox"
+    >
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="[긴급재난문자]"
+        android:textSize="13sp"
+        android:textColor="@android:color/black"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine"
+        android:text="오늘 11:53분 경북 경주 남남서쪽 10km 지역에서 발생이 되었습니다."
+        android:textSize="13sp"
+        android:textColor="#959595"
+        android:layout_marginTop="5dp"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="2016.10.11"
+        android:textColor="#959595"
+        android:textSize="14sp"
+        android:layout_marginTop="5dp"
+        />
+</LinearLayout>

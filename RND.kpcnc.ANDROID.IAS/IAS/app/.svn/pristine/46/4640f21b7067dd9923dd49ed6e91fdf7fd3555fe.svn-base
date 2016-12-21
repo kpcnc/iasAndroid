@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">IAS</string>
+    <string name="ias_id">아이디</string>
+    <string name="ias_password">비밀번호</string>
+    <string name="btn_ias_login">로그인</string>
+    <string name="ias_auto_login">자동로그인</string>
+    <string name="ias_signin">회원가입</string>
+    <string name="ias_id_pw_search">아이디/비밀번호 찾기</string>
+</resources>

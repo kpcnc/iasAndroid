@@ -1,0 +1,260 @@
+package ias.kpcnc.co.kr.ias;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Bundle;
+import android.telephony.TelephonyManager;
+import android.util.Log;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.Toast;
+
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+import static ias.kpcnc.co.kr.ias.PostTest.strJson;
+
+/**
+ * Created by Hong on 2016-10-24.
+ */
+
+public class SigninActivity extends Activity {
+    private static final String TAG = "SigninActivity";
+
+    LinearLayout linearLayout;
+    InputMethodManager inputMethodManager;
+
+    String modelNm;
+    String dveComp;
+    String dveImei;
+
+    EditText userId;
+    EditText userPwd;
+    EditText userPwdChk;
+    EditText userNm;
+    EditText userEmail;
+
+    User userVo;
+    Device deviceVo;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_sign);
+
+        // 디바이스 정보 가져오기
+        modelNm = Build.MODEL;
+        dveComp = Build.MANUFACTURER;
+        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+        dveImei = telephonyManager.getDeviceId();
+
+        Log.d(TAG, "모델명: " + modelNm + "\n제조사: " + dveComp + "\nIMEI: " + dveImei);
+
+        // 화면에서 입력폼 외에 다른 화면 클릭시 키보드 숨기기
+        linearLayout = (LinearLayout)findViewById(R.id.activity_sign);
+        linearLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                inputMethodManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputMethodManager.hideSoftInputFromWindow(linearLayout.getWindowToken(), 0);
+            }
+        });
+
+        userId = (EditText) findViewById(R.id.ias_reg_id);
+        userPwd = (EditText) findViewById(R.id.ias_reg_password);
+        userPwdChk = (EditText) findViewById(R.id.ias_reg_password_chk);
+        userNm = (EditText) findViewById(R.id.ias_reg_name);
+        userEmail = (EditText) findViewById(R.id.ias_reg_email);
+
+        // check network
+        if(isConnected()) {
+            Log.d(TAG, "********** SigninActivity network connected");
+        } else {
+            Toast.makeText(this, "인터넷 연결이 필요합니다.", Toast.LENGTH_LONG).show();
+        }
+
+    }
+
+    public boolean isConnected(){
+
+        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Activity.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected())
+            return true;
+        else
+            return false;
+    }
+
+    public void onClick(View view) {
+
+        if(userId.getText().toString().length() == 0) {
+            Toast.makeText(SigninActivity.this, "아이디는 필수 정보입니다.", Toast.LENGTH_LONG).show();
+            userId.requestFocus();
+            return;
+        }
+        if(userPwd.getText().toString().length() == 0) {
+            Toast.makeText(SigninActivity.this, "비밀번호는 필수 정보입니다.", Toast.LENGTH_LONG).show();
+            userPwd.requestFocus();
+            return;
+        }
+        if(userPwdChk.getText().toString().length() == 0) {
+            Toast.makeText(SigninActivity.this, "비밀번호 확인은 필수 정보입니다.", Toast.LENGTH_LONG).show();
+            userPwdChk.requestFocus();
+            return;
+        }
+        if(userNm.getText().toString().length() == 0) {
+            Toast.makeText(SigninActivity.this, "이름은 필수 정보입니다.", Toast.LENGTH_LONG).show();
+            userNm.requestFocus();
+            return;
+        }
+        if(userEmail.getText().toString().length() == 0) {
+            Toast.makeText(SigninActivity.this, "이메일은 필수 정보입니다.", Toast.LENGTH_LONG).show();
+            userEmail.requestFocus();
+            return;
+        }
+        if(!userPwd.getText().toString().equals(userPwdChk.getText().toString())) {
+            Toast.makeText(SigninActivity.this, "비밀번호가 일치하지 않습니다.", Toast.LENGTH_LONG).show();
+            userPwd.setText("");
+            userPwdChk.setText("");
+            userPwd.requestFocus();
+            return;
+        }
+
+        // call AsynTask to perform network operation on separate thread
+        HttpAsyncTask httpTask = new HttpAsyncTask(SigninActivity.this);
+
+        // TODO 디바이스 정보 추가
+        httpTask.execute("http://hmkcode.appspot.com/jsonservlet", userId.getText().toString(), userPwd.getText().toString(), userNm.getText().toString(), userEmail.getText().toString());
+
+    }
+
+    public static String POST(String url, User user){
+        InputStream is = null;
+        String result = "";
+        try {
+            URL urlCon = new URL(url);
+            HttpURLConnection httpCon = (HttpURLConnection)urlCon.openConnection();
+
+            String json = "";
+
+            // build jsonObject
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.accumulate("userId", user.getUserId());
+            jsonObject.accumulate("userPwd", user.getUserPwd());
+            jsonObject.accumulate("userNm", user.getUserNm());
+            jsonObject.accumulate("userEmail", user.getUserEmail());
+
+            // convert JSONObject to JSON to String
+            json = jsonObject.toString();
+
+            // Set some headers to inform server about the type of the content
+            httpCon.setRequestProperty("Accept", "application/json");
+            httpCon.setRequestProperty("Content-type", "application/json");
+
+            // OutputStream으로 POST 데이터를 넘겨주겠다는 옵션.
+            httpCon.setDoOutput(true);
+            // InputStream으로 서버로 부터 응답을 받겠다는 옵션.
+            httpCon.setDoInput(true);
+
+            OutputStream os = httpCon.getOutputStream();
+            os.write(json.getBytes("euc-kr"));
+            os.flush();
+            // receive response as inputStream
+            try {
+                is = httpCon.getInputStream();
+                // convert inputstream to string
+                if(is != null)
+                    result = convertInputStreamToString(is);
+                else
+                    result = "Did not work!";
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+            finally {
+                httpCon.disconnect();
+            }
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        catch (Exception e) {
+            Log.d("InputStream", e.getLocalizedMessage());
+        }
+
+        return result;
+    }
+
+    private class HttpAsyncTask extends AsyncTask<String, Void, String> {
+
+        private SigninActivity signin;
+
+        HttpAsyncTask(SigninActivity signinActivity) {
+            this.signin = signinActivity;
+        }
+
+        @Override
+        protected String doInBackground(String... urls) {
+
+            userVo = new User();
+            userVo.setUserId(urls[1]);
+            userVo.setUserPwd(urls[2]);
+            userVo.setUserNm(urls[3]);
+            userVo.setUserEmail(urls[4]);
+
+            return POST(urls[0],userVo);
+        }
+
+        // onPostExecute displays the results of the AsyncTask.
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            strJson = result;
+            signin.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Log.d(TAG, "********** Signin User Data Received");
+
+                    // 로그인 화면 이동
+                    Intent intent = new Intent(SigninActivity.this, MainActivity.class);
+                    startActivity(intent);
+
+/*                    try {
+                        JSONArray json = new JSONArray(strJson);
+                        Log.d(TAG, "********** Post Data Json: " + json.toString(1));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }*/
+                }
+            });
+
+        }
+    }
+
+    private static String convertInputStreamToString(InputStream inputStream) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
+        String line = "";
+        String result = "";
+        while((line = bufferedReader.readLine()) != null)
+            result += line;
+
+        inputStream.close();
+        return result;
+
+    }
+
+}

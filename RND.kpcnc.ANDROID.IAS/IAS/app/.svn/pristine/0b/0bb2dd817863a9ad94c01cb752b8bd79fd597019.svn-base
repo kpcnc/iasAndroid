@@ -1,0 +1,96 @@
+package ias.kpcnc.co.kr.ias;
+
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.messaging.FirebaseMessaging;
+
+
+public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
+
+    RelativeLayout relativeLayout;
+    InputMethodManager inputMethodManager;
+
+    EditText iasId;
+    EditText iasPw;
+    CheckBox autoLogin;
+    TextView signin;
+    TextView searchIdPw;
+    Boolean loginCheck;
+    SharedPreferences pref;
+    SharedPreferences.Editor editor;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
+
+        String token = FirebaseInstanceId.getInstance().getToken();
+
+        System.out.println("************************************************* getToken" );
+        Log.d(TAG, "getToken: " + token);
+
+        // 화면에서 입력폼 외에 다른 화면 클릭시 키보드 숨기기
+        relativeLayout = (RelativeLayout)findViewById(R.id.activity_login);
+        relativeLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                inputMethodManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputMethodManager.hideSoftInputFromWindow(relativeLayout.getWindowToken(), 0);
+            }
+        });
+
+        iasId = (EditText) findViewById(R.id.ias_id);
+        iasPw = (EditText) findViewById(R.id.ias_password);
+        autoLogin = (CheckBox) findViewById(R.id.chk_auto_login);
+        signin = (TextView) findViewById(R.id.ias_signin);
+        searchIdPw = (TextView) findViewById(R.id.ias_id_pw_search);
+
+        // TextView에 클릭 이벤트 처리
+        View.OnClickListener listener = new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                switch (view.getId()) {
+                case R.id.ias_signin:
+                    Intent intent = new Intent(MainActivity.this, TermsActivity.class);
+                    startActivity(intent);
+                    break;
+                case R.id.ias_id_pw_search:
+                    Intent intent1 = new Intent(MainActivity.this, SearchIdPwActivity.class);
+                    startActivity(intent1);
+                    break;
+                }
+            }
+        };
+
+        signin.setOnClickListener(listener);
+        searchIdPw.setOnClickListener(listener);
+
+        // topic : api를 사용하여 푸시 알림 전송시 같은 토픽명 그룹 전체에 메세지를 발송 할 수 있다.
+        FirebaseMessaging.getInstance().subscribeToTopic("news");
+        FirebaseInstanceId.getInstance().getToken();
+
+    }
+
+    public void onClick(View view) {
+        Toast.makeText(MainActivity.this, "로그인 화면 구현!!", Toast.LENGTH_LONG).show();
+
+        // http post test
+        Intent intent2 = new Intent(MainActivity.this, PostTest.class);
+        startActivity(intent2);
+    }
+}

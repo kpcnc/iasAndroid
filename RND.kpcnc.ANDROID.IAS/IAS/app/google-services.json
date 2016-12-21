@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "10857760172",
+    "firebase_url": "https://ias-push-example.firebaseio.com",
+    "project_id": "ias-push-example",
+    "storage_bucket": "ias-push-example.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:10857760172:android:42caee4e98b46774",
+        "android_client_info": {
+          "package_name": "ias.kpcnc.co.kr.ias"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "10857760172-msbva8igduu4g89kjlr2ni8njokui77t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA27FJ-Y3nxslKP7whB7Z8R7BgR_kLEXMg"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
